@@ -1,34 +1,32 @@
-# Use NVIDIA CUDA 12.6 Devel image as base (contains nvcc and development headers)
-FROM nvidia/cuda:13.0.0-devel-ubuntu22.04
+# Use NVIDIA CUDA 12.6.3 Devel on Ubuntu 24.04 (Python 3.12 is native)
+FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
 
 # Set non-interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install Python 3.12, development headers, and other necessary tools
+# Update and install Python 3 development headers and tools
+# On Ubuntu 24.04, 'python3' is already version 3.12.
 RUN apt-get update && apt-get install -y \
-    python3.12 \
-    python3.12-dev \
-    python3.12-distutils \
+    python3 \
+    python3-dev \
     python3-pip \
+    python3-setuptools \
     git \
     wget \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Python 3.12 as the default python
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
-    && update-alternatives --set python3 /usr/bin/python3.12 \
-    && ln -s /usr/bin/python3 /usr/bin/python
+# Set Python 3 as the default python
+RUN ln -s /usr/bin/python3 /usr/bin/python || true
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# Install vLLM (Choosing a version that has better Blackwell support)
-# We use vLLM >= 0.6.6 which includes more Blackwell-related fixes
-RUN pip install vllm>=0.6.6
+# Upgrade pip and install vLLM
+# Note: Ubuntu 24.04 requires --break-system-packages for pip install in system context 
+# unless using a virtual environment. For a container, this flag is acceptable.
+RUN python3 -m pip install --upgrade pip --break-system-packages \
+    && pip install vllm>=0.6.6 --break-system-packages
 
 # Set environment variables for compilation and runtime
-# Using stubs and compat paths to ensure -lcuda works during Triton kernel compilation
+# These paths are critical for Blackwell Triton kernel compilation on WSL
 ENV LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/usr/local/cuda/compat:$LIBRARY_PATH
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/cuda/compat:$LD_LIBRARY_PATH
 
@@ -38,5 +36,5 @@ WORKDIR /app
 # Expose the API port
 EXPOSE 8000
 
-# The entrypoint mimicking the official vllm-openai image
+# Entrypoint using python3 explicitly
 ENTRYPOINT ["python3", "-m", "vllm.entrypoints.openai.api_server"]
