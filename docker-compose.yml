@@ -1,0 +1,180 @@
+networks:
+  ai-net:
+    driver: bridge
+
+services:
+  # ==========================================
+  # GATEKEEPER (INTERNAL PROXY)
+  # ==========================================
+  nginx:
+    image: nginx:latest
+    container_name: solv-proxy
+    restart: always
+    ports:
+      - "8080:80" # ENTRY POINT DUY NHẤT
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      open-webui:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================
+  # AI COMPUTE LAYER (vLLM)
+  # ==========================================
+  vllm-backend:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-engine
+    runtime: nvidia
+    restart: unless-stopped
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0,1}
+    volumes:
+      - ./models:/models
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /models/${VLLM_MODEL:-Qwen3-Coder-30B-A3B-Instruct}
+      --served-model-name "${VLLM_MODEL_NAME:-qwen3-coder-30b}"
+      --tensor-parallel-size ${TENSOR_PARALLEL_SIZE:-2}
+      --max-model-len ${MAX_MODEL_LEN:-8192}
+      --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.95}
+      --enable-auto-tool-choice
+      --tool-call-parser hermes
+    expose: 
+      - "8000"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # vLLM cần thời gian load model
+
+  # ==========================================
+  # API ROUTING LAYER
+  # ==========================================
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm-gateway
+    restart: always
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+    command: [ "--config", "/app/config.yaml", "--port", "4000" ]
+    expose:
+      - "4000"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ==========================================
+  # LOGIC & DATA LAYER
+  # ==========================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant-db
+    restart: always
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    expose:
+      - "6333"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: always
+    volumes:
+      - ./data/searxng:/etc/searxng
+    expose:
+      - "8080"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: pipelines-logic
+    restart: always
+    volumes:
+      - ./pipelines:/app/pipelines
+    environment:
+      - PIPELINES_URLS=http://pipelines:9099
+      - OPENAI_API_BASE_URL=http://litellm:4000
+      - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
+    expose:
+      - "9099"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9099/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ==========================================
+  # INTERFACE LAYER
+  # ==========================================
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
+    volumes:
+      - ./data/openwebui:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URL=http://pipelines:9099
+      - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
+      - WEBUI_NAME=SOLV Enterprise Hub
+      - ENABLE_OLLAMA_API=False
+    expose:
+      - "8080"
+    depends_on:
+      litellm:
+        condition: service_healthy
+      pipelines:
+        condition: service_healthy
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

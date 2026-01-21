@@ -1,0 +1,63 @@
+general_settings:
+  # Master Key sẽ được load từ environment variable LITELLM_MASTER_KEY
+  # Tắt alerting vì chưa config webhook
+  alerting: []
+  # Debug mode (Tắt khi ra production để tăng tốc)
+  detailed_debug: false
+
+model_list:
+  # ----------------------------------------------------------------------
+  # MODEL 1: MAIN MODEL (Qwen3 Coder - Running on vLLM)
+  # ----------------------------------------------------------------------
+  - model_name: qwen3-coder-30b
+    litellm_params:
+      model: openai/qwen3-coder-30b  # format: openai/<tên-model-trong-vllm>
+      api_base: http://vllm-backend:8000/v1
+      api_key: EMPTY  # vLLM nội bộ thường không set key
+      timeout: 600    # Timeout dài cho reasoning/coding tasks
+      max_tokens: 4096
+      rpm: 1000       # Requests per minute limit
+
+  # Alias cho compatibility với các tool dùng tên OpenAI
+  - model_name: gpt-4-turbo
+    litellm_params:
+      model: openai/qwen3-coder-30b
+      api_base: http://vllm-backend:8000/v1
+      api_key: EMPTY
+      timeout: 600
+      max_tokens: 4096
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/qwen3-coder-30b
+      api_base: http://vllm-backend:8000/v1
+      api_key: EMPTY
+      timeout: 600
+      max_tokens: 4096
+
+  # ----------------------------------------------------------------------
+  # MODEL 2: EMBEDDING MODEL (Chạy chung vLLM hoặc service riêng)
+  # Nếu bạn dùng vLLM để chạy cả embedding (flag --enable-embedding)
+  # ----------------------------------------------------------------------
+  - model_name: text-embedding-3-small
+    litellm_params:
+      model: openai/nomic-embed-text
+      api_base: http://vllm-backend:8000/v1
+      api_key: EMPTY
+
+# ----------------------------------------------------------------------
+# ROUTER SETTINGS
+# Nếu có external fallback API, uncomment và config phần dưới
+# ----------------------------------------------------------------------
+router_settings:
+  retry_policy:
+    num_retries: 3
+    request_timeout: 600
+
+# ----------------------------------------------------------------------
+# FALLBACKS (Uncomment khi có External API backup)
+# ----------------------------------------------------------------------
+# litellm_settings:
+#   fallbacks:
+#     - model: gpt-4-turbo
+#       fallback_models: ["openrouter/anthropic/claude-3.5-sonnet"]
