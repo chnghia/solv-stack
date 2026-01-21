@@ -30,7 +30,9 @@ services:
   # AI COMPUTE LAYER (vLLM)
   # ==========================================
   vllm-backend:
-    image: vllm/vllm-openai:latest
+    build:
+      context: .
+      dockerfile: vllm.Dockerfile
     container_name: vllm-engine
     runtime: nvidia
     restart: unless-stopped
@@ -38,20 +40,19 @@ services:
       - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH 
     volumes:
       - ./models:/models
       - ~/.cache/huggingface:/root/.cache/huggingface
       - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
       - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
-    ipc: host
+    shm_size: '2gb'
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu, compute, utility]
+              capabilities: [gpu]
     command: >
       --model /models/${VLLM_MODEL:-Qwen2.5-7B-Instruct}
       --served-model-name "${VLLM_MODEL_NAME:-qwen2.5-7b}"
