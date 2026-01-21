@@ -57,6 +57,7 @@ services:
       --tensor-parallel-size ${TENSOR_PARALLEL_SIZE:-1}
       --max-model-len ${MAX_MODEL_LEN:-8192}
       --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.95}
+      --enforce-eager
       --enable-auto-tool-choice
       --tool-call-parser hermes
     expose: 
