@@ -80,7 +80,7 @@ docker compose up -d
 Access the services:
 
 * **Chat UI:** `http://localhost:8080`
-* **API Gateway:** `http://localhost:8080/api`
+* **API Gateway:** `http://localhost:8080/llm`
 * **Vector DB:** `http://localhost:8080/qdrant`
 * **Web Search:** `http://localhost:8080/search`
 

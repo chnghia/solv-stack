@@ -52,8 +52,8 @@ services:
               count: all
               capabilities: [gpu, compute, utility]
     command: >
-      --model /models/${VLLM_MODEL:-Qwen3-Coder-30B-A3B-Instruct}
-      --served-model-name "${VLLM_MODEL_NAME:-qwen3-coder-30b}"
+      --model /models/${VLLM_MODEL:-Qwen2.5-7B-Instruct}
+      --served-model-name "${VLLM_MODEL_NAME:-qwen2.5-7b}"
       --tensor-parallel-size ${TENSOR_PARALLEL_SIZE:-1}
       --max-model-len ${MAX_MODEL_LEN:-8192}
       --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.95}
