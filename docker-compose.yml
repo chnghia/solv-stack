@@ -124,7 +124,7 @@ services:
     volumes:
       - ./data/searxng:/etc/searxng
     environment:
-      - SEARXNG_BASE_URL=http://localhost:8080/search/
+      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL:-http://localhost:8080/search/}
     cap_drop:
       - ALL
     cap_add:
