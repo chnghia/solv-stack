@@ -75,7 +75,7 @@ services:
   # API ROUTING LAYER
   # ==========================================
   litellm:
-    image: ghcr.io/berriai/litellm:main-latest
+    image: ghcr.io/berriai/litellm:main-stable
     container_name: litellm-gateway
     restart: always
     environment:
@@ -88,11 +88,13 @@ services:
     networks:
       - ai-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health/liveliness"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+      test:
+        - CMD-SHELL
+        - python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"  # Command to execute for health check
+      interval: 30s  # Perform health check every 30 seconds
+      timeout: 10s   # Health check command times out after 10 seconds
+      retries: 3     # Retry up to 3 times if health check fails
+      start_period: 40s  # Wait 40 seconds after container start before beginning health checks
 
   # ==========================================
   # LOGIC & DATA LAYER
