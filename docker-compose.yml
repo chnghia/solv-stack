@@ -36,9 +36,13 @@ services:
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./models:/models
       - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
+      - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
     ipc: host
     deploy:
       resources:
@@ -46,7 +50,7 @@ services:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu]
+              capabilities: [gpu, compute, utility]
     command: >
       --model /models/${VLLM_MODEL:-Qwen3-Coder-30B-A3B-Instruct}
       --served-model-name "${VLLM_MODEL_NAME:-qwen3-coder-30b}"
