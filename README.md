@@ -214,4 +214,4 @@ MIT License
 
 ---
 
-*Built with ❤️ by the AI Engineering Team.*
+*Built with ❤️ by NghiaCH.*
