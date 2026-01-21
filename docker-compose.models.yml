@@ -1,0 +1,84 @@
+# Multi-Model Configuration
+# This file adds additional vLLM instances for running multiple models
+# Usage: docker compose -f docker-compose.yml -f docker-compose.models.yml up -d
+
+services:
+  # ==========================================
+  # ADDITIONAL MODEL: Embedding Model
+  # ==========================================
+  vllm-embedding:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-embedding
+    runtime: nvidia
+    restart: unless-stopped
+    environment:
+      - CUDA_VISIBLE_DEVICES=2  # Use different GPU(s) than main model
+    volumes:
+      - ./models:/models
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']  # Specific GPU ID
+              capabilities: [gpu]
+    command: >
+      --model /models/nomic-embed-text-v1.5
+      --served-model-name "nomic-embed-text"
+      --max-model-len 8192
+      --gpu-memory-utilization 0.90
+    expose:
+      - "8000"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ==========================================
+  # ADDITIONAL MODEL: Small/Fast Model
+  # ==========================================
+  vllm-small:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-small
+    runtime: nvidia
+    restart: unless-stopped
+    environment:
+      - CUDA_VISIBLE_DEVICES=3
+    volumes:
+      - ./models:/models
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['3']
+              capabilities: [gpu]
+    command: >
+      --model /models/Qwen2.5-7B-Instruct
+      --served-model-name "qwen2.5-7b"
+      --max-model-len 32768
+      --gpu-memory-utilization 0.90
+      --enable-auto-tool-choice
+      --tool-call-parser hermes
+    expose:
+      - "8000"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  ai-net:
+    external: true
