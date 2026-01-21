@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: vllm.Dockerfile
     container_name: vllm-engine
-    runtime: nvidia
+    # runtime: nvidia
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
@@ -46,6 +46,13 @@ services:
       - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
       - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
     shm_size: '2gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     command: >
       --model /models/${VLLM_MODEL:-Qwen2.5-7B-Instruct}
       --served-model-name "${VLLM_MODEL_NAME:-qwen2.5-7b}"
