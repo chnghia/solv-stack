@@ -15,7 +15,7 @@ model_list:
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY  # vLLM nội bộ thường không set key
       timeout: 600    # Timeout dài cho reasoning/coding tasks
-      max_tokens: 32000
+      max_tokens: 4096
       rpm: 1000       # Requests per minute limit
 
   # Alias cho compatibility với các tool dùng tên OpenAI
@@ -25,7 +25,7 @@ model_list:
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY
       timeout: 600
-      max_tokens: 32000
+      max_tokens: 4096
 
   - model_name: gpt-4o
     litellm_params:
@@ -33,7 +33,7 @@ model_list:
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY
       timeout: 600
-      max_tokens: 32000
+      max_tokens: 4096
 
   # ----------------------------------------------------------------------
   # MODEL 2: EMBEDDING MODEL (Chạy chung vLLM hoặc service riêng)
