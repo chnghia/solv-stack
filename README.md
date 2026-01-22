@@ -39,13 +39,52 @@ graph LR
 | **Qdrant** | Vector DB | Stores embeddings for thousands of enterprise documents. |
 | **Pipelines** | Logic Middleware | Allows injecting Python code to handle RAG, Function Calling before calling LLM. |
 
+
+## 🎯 Use Cases
+
+SOLV Stack provides the **LLM infrastructure** to build:
+
+- **AI Agents**: CrewAI, LangGraph, AutoGen workflows with tool calling support
+- **RAG Systems**: Document Q&A with vector search (Qdrant) and web search (SearXNG)
+- **Agentic Coding**: Continue, Cline, OpenCode integration with custom endpoints
+- **Production API**: Self-hosted OpenAI-compatible endpoint for any application
+
+
+## 💻 Platform Compatibility
+
+### WSL2 Support ✅
+
+SOLV Stack is **fully compatible with Windows WSL2**, making it ideal for developers on Windows with high-end NVIDIA GPUs:
+
+- ✅ **Tested on WSL2** with Ubuntu 24.04
+- ✅ **RTX 5090 / Blackwell GPU** optimizations included
+- ✅ **CUDA 12.9** with FlashAttention support
+- ✅ **Docker Desktop** WSL2 backend integration
+
+**WSL2 Requirements:**
+- Windows 11 (Build 22000+)
+- NVIDIA GPU Driver 560+ with WSL2 support
+- Docker Desktop with WSL2 engine
+- 32GB+ system RAM recommended
+
+**Performance Notes:**
+- vLLM optimized with chunked prefill for 128K context
+- GPU memory utilization tuned for stability (0.60-0.70)
+- Blackwell architecture support via CUDA arch flags
+
+### Linux Native
+
+- Ubuntu 24.04 LTS (recommended)
+- RHEL/CentOS 8+ with NVIDIA drivers
+- Any Linux distro with Docker + NVIDIA Container Toolkit
+
 ---
 
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
 
-* **OS:** Linux (Ubuntu 22.04/24.04 recommended)
+* **OS:** Linux (Ubuntu 24.04 recommended)
 * **GPU Driver:** NVIDIA Driver 535+ & CUDA 12.x
 * **Docker:** Docker Engine + **NVIDIA Container Toolkit**
 
@@ -208,7 +247,20 @@ solv-stack/
 * **Blackwell Optimization:** If using RTX 6000 Ada/Blackwell, add the flag `--kv-cache-dtype fp8` to the vLLM command to double context window/throughput.
 * **Agent Ready:** LiteLLM is configured to handle OpenAI-standard Tool Calling, fully compatible with **CrewAI**, **LangGraph**, and **VSCode Continue**.
 
-## 📝 License
+## � Acknowledgments
+
+SOLV Stack builds upon exceptional open-source projects:
+
+- **[vLLM](https://github.com/vllm-project/vllm)** - High-performance LLM inference engine with PagedAttention
+- **[LiteLLM](https://github.com/BerriAI/litellm)** - Unified LLM API gateway and proxy
+- **[OpenWebUI](https://github.com/open-webui/open-webui)** - Feature-rich ChatGPT-like interface
+- **[SearXNG](https://github.com/searxng/searxng)** - Privacy-respecting metasearch engine
+- **[Qdrant](https://github.com/qdrant/qdrant)** - Vector similarity search engine
+
+**Special Thanks:**
+- **[BoltzmannEntropy/vLLM-5090](https://github.com/BoltzmannEntropy/vLLM-5090)** - For WSL2 and Blackwell GPU optimization configurations that enabled SOLV Stack to run efficiently on RTX 5090 and WSL2 environments
+
+## �📝 License
 
 MIT License
 

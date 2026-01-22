@@ -113,7 +113,7 @@ services:
     networks:
       - ai-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/6333' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -7,16 +7,21 @@ services:
   # ADDITIONAL MODEL: Embedding Model
   # ==========================================
   vllm-embedding:
-    image: vllm/vllm-openai:latest
+    build:
+      context: .
+      dockerfile: vllm.Dockerfile
     container_name: vllm-embedding
-    runtime: nvidia
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=2  # Use different GPU(s) than main model
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ./models:/models
       - ~/.cache/huggingface:/root/.cache/huggingface
-    ipc: host
+      - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
+      - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
+    shm_size: '4gb'
     deploy:
       resources:
         reservations:
@@ -28,7 +33,8 @@ services:
       --model /models/nomic-embed-text-v1.5
       --served-model-name "nomic-embed-text"
       --max-model-len 8192
-      --gpu-memory-utilization 0.90
+      --gpu-memory-utilization 0.60
+      --max-num-seqs 8
     expose:
       - "8000"
     networks:
@@ -44,16 +50,21 @@ services:
   # ADDITIONAL MODEL: Small/Fast Model
   # ==========================================
   vllm-small:
-    image: vllm/vllm-openai:latest
+    build:
+      context: .
+      dockerfile: vllm.Dockerfile
     container_name: vllm-small
-    runtime: nvidia
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=3
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ./models:/models
       - ~/.cache/huggingface:/root/.cache/huggingface
-    ipc: host
+      - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
+      - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
+    shm_size: '8gb'
     deploy:
       resources:
         reservations:
@@ -64,8 +75,10 @@ services:
     command: >
       --model /models/Qwen2.5-7B-Instruct
       --served-model-name "qwen2.5-7b"
-      --max-model-len 32768
-      --gpu-memory-utilization 0.90
+      --max-model-len 131072
+      --gpu-memory-utilization 0.60
+      --max-num-seqs 4
+      --enable-chunked-prefill
       --enable-auto-tool-choice
       --tool-call-parser hermes
     expose:
