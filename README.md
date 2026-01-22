@@ -247,7 +247,7 @@ solv-stack/
 * **Blackwell Optimization:** If using RTX 6000 Ada/Blackwell, add the flag `--kv-cache-dtype fp8` to the vLLM command to double context window/throughput.
 * **Agent Ready:** LiteLLM is configured to handle OpenAI-standard Tool Calling, fully compatible with **CrewAI**, **LangGraph**, and **VSCode Continue**.
 
-## � Acknowledgments
+## 🙏 Acknowledgments
 
 SOLV Stack builds upon exceptional open-source projects:
 
@@ -260,7 +260,7 @@ SOLV Stack builds upon exceptional open-source projects:
 **Special Thanks:**
 - **[BoltzmannEntropy/vLLM-5090](https://github.com/BoltzmannEntropy/vLLM-5090)** - For WSL2 and Blackwell GPU optimization configurations that enabled SOLV Stack to run efficiently on RTX 5090 and WSL2 environments
 
-## �📝 License
+## 📝 License
 
 MIT License
 
