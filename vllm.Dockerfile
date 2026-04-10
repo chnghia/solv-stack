@@ -35,8 +35,8 @@ ENV NVCC_THREADS=8
 # Note: Ubuntu 24.04 requires --break-system-packages for pip install in system context 
 # unless using a virtual environment. For a container, this flag is acceptable.
 RUN pip install --upgrade pip --break-system-packages || true
-RUN pip install -U vllm --break-system-packages
-RUN pip install -U transformers accelerate --break-system-packages
+RUN pip install -U vllm --pre --break-system-packages
+RUN pip install -U transformers==5.5.0 accelerate --break-system-packages
 
 # Set environment variables for compilation and runtime
 # These paths are critical for Blackwell Triton kernel compilation on WSL

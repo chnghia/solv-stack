@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: vllm.Dockerfile
-    container_name: vllm-small
+    container_name: vllm-gemma
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
@@ -95,7 +95,7 @@ services:
     build:
       context: .
       dockerfile: vllm.Dockerfile
-    container_name: vllm-small
+    container_name: vllm-qwen
     restart: unless-stopped
     environment:
       - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
@@ -103,7 +103,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ./models:/models
-      - vllm_data_gemma:/root/.cache/
+      - vllm_data_qwen:/root/.cache/
     shm_size: '8gb'
     deploy:
       resources:
@@ -121,7 +121,7 @@ services:
       --enable-chunked-prefill
       --enable-auto-tool-choice
       --reasoning-parser qwen3
-      --tool-call-parser qwen3
+      --tool-call-parser qwen3_coder
     expose:
       - "8002"
     networks:
@@ -136,3 +136,8 @@ services:
 networks:
   ai-net:
     external: true
+    driver: bridge
+
+volumes:
+  vllm_data_gemma:
+  vllm_data_qwen:
