@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     vllm --extra-index-url https://wheels.vllm.ai/nightly/cu129 \
     --extra-index-url https://download.pytorch.org/whl/cu129 \
     --index-strategy unsafe-best-match \
-    transformers==5.5.0 \
+    transformers \
     accelerate
 
 # Set environment variables for compilation and runtime
