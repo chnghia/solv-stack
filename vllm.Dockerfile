@@ -1,5 +1,7 @@
-# Use NVIDIA CUDA 12.8.0 Devel on Ubuntu 24.04 (Python 3.12 is native)
 FROM nvidia/cuda:13.0.2-devel-ubuntu24.04
+
+# Install uv for faster builds
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # Set non-interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,8 +11,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-dev \
-    python3-pip \
-    python3-setuptools \
     git \
     wget \
     curl \
@@ -32,11 +32,15 @@ ENV MAX_JOBS=2
 ENV NVCC_THREADS=8
 
 # Install vLLM with FlashInfer support for optimized attention
-# Note: Ubuntu 24.04 requires --break-system-packages for pip install in system context 
-# unless using a virtual environment. For a container, this flag is acceptable.
-RUN pip install --upgrade pip --break-system-packages || true
-RUN pip install -U vllm --pre --break-system-packages
-RUN pip install -U transformers==5.5.0 accelerate --break-system-packages
+# Using uv for faster installation and --system to install into system python
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system --pre \
+    vllm --extra-index-url https://wheels.vllm.ai/nightly/cu129 \
+    --extra-index-url https://download.pytorch.org/whl/cu129 \
+    --index-strategy unsafe-best-match
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system transformers==5.5.0 \
+    accelerate
 
 # Set environment variables for compilation and runtime
 # These paths are critical for Blackwell Triton kernel compilation on WSL

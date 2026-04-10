@@ -4,8 +4,6 @@ general_settings:
   alerting: []
   # Debug mode (Tắt khi ra production để tăng tốc)
   detailed_debug: false
-  # Enable passthrough của tool calls
-  pass_through_endpoints: true
 
   # Không drop tool_calls từ request/response
   drop_params: false
