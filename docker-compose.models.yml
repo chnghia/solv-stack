@@ -91,47 +91,47 @@ services:
       retries: 5
       start_period: 60s
 
-  vllm-qwen:
-    build:
-      context: .
-      dockerfile: vllm.Dockerfile
-    container_name: vllm-qwen
-    restart: unless-stopped
-    environment:
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    volumes:
-      - ./models:/models
-      - vllm_data_qwen:/root/.cache/
-    shm_size: '8gb'
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    command: >
-      --model /models/Qwen3.5-35B-A3B-FP8
-      --served-model-name "qwen3.5-35b"
-      --max-model-len ${MAX_MODEL_LEN:-131072}
-      --gpu-memory-utilization 0.60
-      --max-num-seqs 1
-      --enable-chunked-prefill
-      --enable-auto-tool-choice
-      --reasoning-parser qwen3
-      --tool-call-parser qwen3_coder
-    expose:
-      - "8002"
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+  # vllm-qwen:
+  #   build:
+  #     context: .
+  #     dockerfile: vllm.Dockerfile
+  #   container_name: vllm-qwen
+  #   restart: unless-stopped
+  #   environment:
+  #     - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #   volumes:
+  #     - ./models:/models
+  #     - vllm_data_qwen:/root/.cache/
+  #   shm_size: '8gb'
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   command: >
+  #     --model /models/Qwen3.5-35B-A3B-FP8
+  #     --served-model-name "qwen3.5-35b"
+  #     --max-model-len ${MAX_MODEL_LEN:-131072}
+  #     --gpu-memory-utilization 0.60
+  #     --max-num-seqs 1
+  #     --enable-chunked-prefill
+  #     --enable-auto-tool-choice
+  #     --reasoning-parser qwen3
+  #     --tool-call-parser qwen3_coder
+  #   expose:
+  #     - "8002"
+  #   networks:
+  #     - ai-net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 60s
 
 networks:
   ai-net:
@@ -140,4 +140,4 @@ networks:
 
 volumes:
   vllm_data_gemma:
-  vllm_data_qwen:
+  # vllm_data_qwen:
