@@ -9,9 +9,9 @@ model_list:
   # ----------------------------------------------------------------------
   # MODEL 1: MAIN MODEL (Qwen3 Coder - Running on vLLM)
   # ----------------------------------------------------------------------
-  - model_name: qwen2.5-7b
+  - model_name: qwen3-coder-30b
     litellm_params:
-      model: openai/qwen2.5-7b  # format: openai/<tên-model-trong-vllm>
+      model: openai/qwen3-coder-30b  # format: openai/<tên-model-trong-vllm>
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY  # vLLM nội bộ thường không set key
       timeout: 600    # Timeout dài cho reasoning/coding tasks
@@ -21,7 +21,7 @@ model_list:
   # Alias cho compatibility với các tool dùng tên OpenAI
   - model_name: gpt-4-turbo
     litellm_params:
-      model: openai/qwen2.5-7b
+      model: openai/qwen3-coder-30b
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY
       timeout: 600
@@ -29,7 +29,7 @@ model_list:
 
   - model_name: gpt-4o
     litellm_params:
-      model: openai/qwen2.5-7b
+      model: openai/qwen3-coder-30b
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY
       timeout: 600

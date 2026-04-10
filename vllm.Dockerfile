@@ -1,5 +1,5 @@
 # Use NVIDIA CUDA 12.8.0 Devel on Ubuntu 24.04 (Python 3.12 is native)
-FROM nvidia/cuda:12.9.0-devel-ubuntu24.04
+FROM nvidia/cuda:13.0.2-devel-ubuntu24.04
 
 # Set non-interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
@@ -21,11 +21,11 @@ RUN ln -s /usr/bin/python3 /usr/bin/python || true
 
 # Set environment variables for CUDA architecture compilation
 # CUDA arch list used by torch/vLLM extensions - optimized for RTX 5090 and Blackwell
-ENV TORCH_CUDA_ARCH_LIST='10.0+PTX 12.0+PTX'
+ENV TORCH_CUDA_ARCH_LIST='10.0+PTX 12.0+PTX 13.0+PTX'
 
 # FlashAttention CUDA architectures - Blackwell support (compute capability 12.0)
-ENV FLASH_ATTN_CUDA_ARCHS=120
-ENV VLLM_FA_CMAKE_GPU_ARCHES='80-real;90-real;100-real'
+ENV FLASH_ATTN_CUDA_ARCHS=130
+ENV VLLM_FA_CMAKE_GPU_ARCHES='80-real;90-real;100-real;120-real'
 
 # Build parallelization settings
 ENV MAX_JOBS=2
@@ -35,7 +35,8 @@ ENV NVCC_THREADS=8
 # Note: Ubuntu 24.04 requires --break-system-packages for pip install in system context 
 # unless using a virtual environment. For a container, this flag is acceptable.
 RUN pip install --upgrade pip --break-system-packages || true
-RUN pip install 'vllm[flashinfer]>=0.6.6' --break-system-packages
+RUN pip install -U vllm --break-system-packages
+RUN pip install -U transformers accelerate --break-system-packages
 
 # Set environment variables for compilation and runtime
 # These paths are critical for Blackwell Triton kernel compilation on WSL
@@ -43,7 +44,7 @@ ENV LIBRARY_PATH=/usr/local/cuda/lib64/stubs:/usr/local/cuda/compat:$LIBRARY_PAT
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/cuda/compat:$LD_LIBRARY_PATH
 
 # Configure CUDA compat library
-RUN ldconfig /usr/local/cuda-12/compat/ || true
+RUN ldconfig /usr/local/cuda-13/compat/ || true
 
 # Set workplace
 WORKDIR /app
