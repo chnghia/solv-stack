@@ -6,87 +6,128 @@ services:
   # ==========================================
   # ADDITIONAL MODEL: Embedding Model
   # ==========================================
-  vllm-embedding:
-    build:
-      context: .
-      dockerfile: vllm.Dockerfile
-    container_name: vllm-embedding
-    restart: unless-stopped
-    environment:
-      - CUDA_VISIBLE_DEVICES=2  # Use different GPU(s) than main model
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    volumes:
-      - ./models:/models
-      - ~/.cache/huggingface:/root/.cache/huggingface
-      - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
-      - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
-    shm_size: '4gb'
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['2']  # Specific GPU ID
-              capabilities: [gpu]
-    command: >
-      --model /models/nomic-embed-text-v1.5
-      --served-model-name "nomic-embed-text"
-      --max-model-len 8192
-      --gpu-memory-utilization 0.60
-      --max-num-seqs 8
-    expose:
-      - "8000"
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+  # vllm-embedding:
+  #   build:
+  #     context: .
+  #     dockerfile: vllm.Dockerfile
+  #   container_name: vllm-embedding
+  #   restart: unless-stopped
+  #   environment:
+  #     - CUDA_VISIBLE_DEVICES=2  # Use different GPU(s) than main model
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #   volumes:
+  #     - ./models:/models
+  #     - ~/.cache/huggingface:/root/.cache/huggingface
+  #     - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
+  #     - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
+  #   shm_size: '4gb'
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             device_ids: ['2']  # Specific GPU ID
+  #             capabilities: [gpu]
+  #   command: >
+  #     --model /models/nomic-embed-text-v1.5
+  #     --served-model-name "nomic-embed-text"
+  #     --max-model-len 8192
+  #     --gpu-memory-utilization 0.60
+  #     --max-num-seqs 8
+  #   expose:
+  #     - "8000"
+  #   networks:
+  #     - ai-net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 60s
 
   # ==========================================
   # ADDITIONAL MODEL: Small/Fast Model
   # ==========================================
-  vllm-small:
+  vllm-gemma:
     build:
       context: .
       dockerfile: vllm.Dockerfile
     container_name: vllm-small
     restart: unless-stopped
     environment:
-      - CUDA_VISIBLE_DEVICES=3
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - ./models:/models
-      - ~/.cache/huggingface:/root/.cache/huggingface
-      - ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
-      - ./data/torch_cache:/root/.cache/torch         # PyTorch cache
+      - vllm_data_gemma:/root/.cache/
     shm_size: '8gb'
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['3']
+              count: all
               capabilities: [gpu]
     command: >
-      --model /models/Qwen2.5-7B-Instruct
-      --served-model-name "qwen2.5-7b"
-      --max-model-len 131072
+      --model /models/gemma-4-26b-a4b
+      --served-model-name "gemma-4-26b"
+      --max-model-len ${MAX_MODEL_LEN:-131072}
       --gpu-memory-utilization 0.60
-      --max-num-seqs 4
+      --max-num-seqs 1
       --enable-chunked-prefill
       --enable-auto-tool-choice
-      --tool-call-parser hermes
+      --reasoning-parser gemma4
+      --tool-call-parser gemma4
     expose:
-      - "8000"
+      - "8001"
     networks:
       - ai-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  vllm-qwen:
+    build:
+      context: .
+      dockerfile: vllm.Dockerfile
+    container_name: vllm-small
+    restart: unless-stopped
+    environment:
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ./models:/models
+      - vllm_data_gemma:/root/.cache/
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /models/Qwen3.5-35B-A3B-FP8
+      --served-model-name "qwen3.5-35b"
+      --max-model-len ${MAX_MODEL_LEN:-131072}
+      --gpu-memory-utilization 0.60
+      --max-num-seqs 1
+      --enable-chunked-prefill
+      --enable-auto-tool-choice
+      --reasoning-parser qwen3
+      --tool-call-parser qwen3
+    expose:
+      - "8002"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 5

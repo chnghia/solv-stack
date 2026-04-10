@@ -15,7 +15,6 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - open-webui
       - litellm
     networks:
       - ai-net
@@ -68,7 +67,7 @@ services:
       --language-model-only
       --dtype auto
 
-    expose: 
+    expose:
       - "8000"
     networks:
       - ai-net
@@ -107,22 +106,22 @@ services:
   # ==========================================
   # LOGIC & DATA LAYER
   # ==========================================
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: qdrant-db
-    restart: always
-    volumes:
-      - ./data/qdrant:/qdrant/storage
-    expose:
-      - "6333"
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/6333' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # qdrant:
+  #   image: qdrant/qdrant:latest
+  #   container_name: qdrant-db
+  #   restart: always
+  #   volumes:
+  #     - ./data/qdrant:/qdrant/storage
+  #   expose:
+  #     - "6333"
+  #   networks:
+  #     - ai-net
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/6333' || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
   searxng:
     image: searxng/searxng:latest
@@ -150,55 +149,55 @@ services:
       retries: 3
       start_period: 10s
 
-  pipelines:
-    image: ghcr.io/open-webui/pipelines:main
-    container_name: pipelines-logic
-    restart: always
-    volumes:
-      - ./pipelines:/app/pipelines
-    environment:
-      # Don't set PIPELINES_URLS - we use local mounted pipelines from ./pipelines
-      - OPENAI_API_BASE_URL=http://litellm:4000
-      - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
-    expose:
-      - "9099"
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:9099/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+  # pipelines:
+  #   image: ghcr.io/open-webui/pipelines:main
+  #   container_name: pipelines-logic
+  #   restart: always
+  #   volumes:
+  #     - ./pipelines:/app/pipelines
+  #   environment:
+  #     # Don't set PIPELINES_URLS - we use local mounted pipelines from ./pipelines
+  #     - OPENAI_API_BASE_URL=http://litellm:4000
+  #     - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
+  #   expose:
+  #     - "9099"
+  #   networks:
+  #     - ai-net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-sf", "http://localhost:9099/"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 15s
 
   # ==========================================
   # INTERFACE LAYER
   # ==========================================
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: open-webui
-    restart: always
-    volumes:
-      - ./data/openwebui:/app/backend/data
-    environment:
-      - OPENAI_API_BASE_URL=http://pipelines:9099
-      - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
-      - WEBUI_NAME=SOLV Enterprise Hub
-      - ENABLE_OLLAMA_API=False
-    expose:
-      - "8080"
-    depends_on:
-      litellm:
-        condition: service_healthy
-      pipelines:
-        condition: service_healthy
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
+  # open-webui:
+  #   image: ghcr.io/open-webui/open-webui:main
+  #   container_name: open-webui
+  #   restart: always
+  #   volumes:
+  #     - ./data/openwebui:/app/backend/data
+  #   environment:
+  #     - OPENAI_API_BASE_URL=http://pipelines:9099
+  #     - OPENAI_API_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
+  #     - WEBUI_NAME=SOLV Enterprise Hub
+  #     - ENABLE_OLLAMA_API=False
+  #   expose:
+  #     - "8080"
+  #   depends_on:
+  #     litellm:
+  #       condition: service_healthy
+  #     pipelines:
+  #       condition: service_healthy
+  #   networks:
+  #     - ai-net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
 volumes:
     vllm_data: # Define the named volume at the top level
