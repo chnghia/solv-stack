@@ -76,19 +76,19 @@ search:
   # formats: [html, csv, json, rss]
   formats:
     - html
-    - json
     - csv
+    - json
 
 server:
   # Is overwritten by ${SEARXNG_PORT} and ${SEARXNG_BIND_ADDRESS}
   port: 8888
-  bind_address: "0.0.0.0"
+  bind_address: "127.0.0.1"
   # public URL of the instance, to ensure correct inbound links. Is overwritten
   # by ${SEARXNG_BASE_URL}.
   base_url: false  # "http://example.com/location"
   # rate limit the number of request on the instance, block some bots.
   # Is overwritten by ${SEARXNG_LIMITER}
-  limiter: true
+  limiter: false
   # enable features designed only for public instances.
   # Is overwritten by ${SEARXNG_PUBLIC_INSTANCE}
   public_instance: false
@@ -438,7 +438,6 @@ engines:
     categories: onions
     enable_http: true
     shortcut: ah
-    inactive: true
 
   - name: anaconda
     engine: xpath
@@ -811,7 +810,6 @@ engines:
   - name: duckduckgo
     engine: duckduckgo
     shortcut: ddg
-    disabled: true
 
   - name: duckduckgo images
     engine: duckduckgo_extra
@@ -1018,7 +1016,8 @@ engines:
   - name: google
     engine: google
     shortcut: go
-    disabled: false
+    # additional_tests:
+    #   android: *test_android
 
   - name: google images
     engine: google_images
@@ -1797,7 +1796,6 @@ engines:
   - name: radio browser
     engine: radio_browser
     shortcut: rb
-    inactive: true
 
   - name: reddit
     engine: reddit
@@ -2073,7 +2071,6 @@ engines:
     categories: onions
     enable_http: true
     shortcut: tch
-    inactive: true
 
   # TubeArchivist is a self-hosted Youtube archivist software.
   # https://docs.searxng.org/dev/engines/online/tubearchivist.html
