@@ -1,0 +1,9 @@
+# SearXNG limiter configuration
+
+[botdetection.ip_limit]
+# activation by HTTP header
+# link_token = "..."
+
+# disable the limiter
+[botdetection.ip_lists]
+# pass_ip = ["127.0.0.1"]

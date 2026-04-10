@@ -129,7 +129,7 @@ services:
     hostname: searxng
     restart: always
     volumes:
-      - ./data/searxng:/etc/searxng
+      - ./searxng:/etc/searxng
     environment:
       - SEARXNG_BASE_URL=${SEARXNG_BASE_URL:-http://localhost:8080/search/}
     cap_drop:
