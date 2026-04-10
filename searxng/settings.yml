@@ -438,7 +438,7 @@ engines:
     categories: onions
     enable_http: true
     shortcut: ah
-    disabled: true
+    inactive: true
 
   - name: anaconda
     engine: xpath
@@ -531,11 +531,6 @@ engines:
     engine: bilibili
     shortcut: bil
     disabled: true
-
-  - name: brave
-    engine: brave
-    shortcut: br
-    disabled: false
 
   - name: bing
     engine: bing
@@ -1802,7 +1797,7 @@ engines:
   - name: radio browser
     engine: radio_browser
     shortcut: rb
-    disabled: true
+    inactive: true
 
   - name: reddit
     engine: reddit
@@ -2078,7 +2073,7 @@ engines:
     categories: onions
     enable_http: true
     shortcut: tch
-    disabled: true
+    inactive: true
 
   # TubeArchivist is a self-hosted Youtube archivist software.
   # https://docs.searxng.org/dev/engines/online/tubearchivist.html
