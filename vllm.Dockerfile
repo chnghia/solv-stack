@@ -3,8 +3,9 @@ FROM nvidia/cuda:13.0.2-devel-ubuntu24.04
 # Install uv for faster builds
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Set non-interactive mode
+# Set non-interactive mode and bypass PEP 668 for system-wide installs
 ENV DEBIAN_FRONTEND=noninteractive
+ENV UV_BREAK_SYSTEM_PACKAGES=1
 
 # Update and install Python 3 development headers and tools
 # On Ubuntu 24.04, 'python3' is already version 3.12.
@@ -32,14 +33,13 @@ ENV MAX_JOBS=2
 ENV NVCC_THREADS=8
 
 # Install vLLM with FlashInfer support for optimized attention
-# Using uv for faster installation and --system to install into system python
+# Using uv for faster installation and --break-system-packages to install into system python
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system --pre \
+    uv pip install --system --break-system-packages --pre \
     vllm --extra-index-url https://wheels.vllm.ai/nightly/cu129 \
     --extra-index-url https://download.pytorch.org/whl/cu129 \
-    --index-strategy unsafe-best-match
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system transformers==5.5.0 \
+    --index-strategy unsafe-best-match \
+    transformers==5.5.0 \
     accelerate
 
 # Set environment variables for compilation and runtime
