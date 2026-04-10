@@ -4,6 +4,11 @@
 # activation by HTTP header
 # link_token = "..."
 
-# disable the limiter
 [botdetection.ip_lists]
 # pass_ip = ["127.0.0.1"]
+
+[botdetection.real_ip]
+header = "X-Forwarded-For"
+num_proxies = 1
+# Trust common private IP ranges for Docker networks
+trusted_proxies = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.1/16"]
