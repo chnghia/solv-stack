@@ -24,15 +24,15 @@ model_list:
       supports_parallel_function_calling: true  # Optional
 
   # Alias cho compatibility với các tool dùng tên OpenAI
-  - model_name: gemma-4-26b
-    litellm_params:
-     model: openai/gemma-4-26b
-     api_base: http://vllm-gemma:8001/v1
-     api_key: EMPTY
-     #timeout: 600
-     max_tokens: 4096
-     upports_function_calling: true  # QUAN TRỌNG!
-     supports_parallel_function_calling: true  # Optional
+  # - model_name: gemma-4-26b
+  #   litellm_params:
+  #    model: openai/gemma-4-26b
+  #    api_base: http://vllm-gemma:8001/v1
+  #    api_key: EMPTY
+  #    #timeout: 600
+  #    max_tokens: 4096
+  #    upports_function_calling: true  # QUAN TRỌNG!
+  #    supports_parallel_function_calling: true  # Optional
 
   #- model_name: qwen3.5-35b
   #  litellm_params:
