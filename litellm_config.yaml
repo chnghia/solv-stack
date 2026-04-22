@@ -8,6 +8,9 @@ general_settings:
   # Không drop tool_calls từ request/response
   drop_params: false
 
+  # Tự động hủy request tới vLLM khi client disconnect
+  cancel_upstream_on_disconnect: true
+
 model_list:
   # ----------------------------------------------------------------------
   # MODEL 1: MAIN MODEL (Qwen3 Coder - Running on vLLM)
@@ -67,7 +70,8 @@ router_settings:
 # ----------------------------------------------------------------------
 # FALLBACKS (Uncomment khi có External API backup)
 # ----------------------------------------------------------------------
-#litellm_settings:
-#   fallbacks:
-#     - model: gpt-4-turbo
-#       fallback_models: ["openrouter/anthropic/claude-3.5-sonnet"]
+# ----------------------------------------------------------------------
+# LITELLM SETTINGS
+# ----------------------------------------------------------------------
+litellm_settings:
+  set_completed_by_on_stream_disconnect: true
