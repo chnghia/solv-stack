@@ -63,9 +63,11 @@ model_list:
 # Nếu có external fallback API, uncomment và config phần dưới
 # ----------------------------------------------------------------------
 router_settings:
+  routing_strategy: simple-shuffle
   retry_policy:
-    num_retries: 3
-    request_timeout: 600
+    num_retries: 1
+    request_timeout: 300
+    stream_timeout: 30
 
 # ----------------------------------------------------------------------
 # FALLBACKS (Uncomment khi có External API backup)
@@ -75,3 +77,5 @@ router_settings:
 # ----------------------------------------------------------------------
 litellm_settings:
   set_completed_by_on_stream_disconnect: true
+  allow_requests_on_stream_disconnect: false
+  drop_params: true
