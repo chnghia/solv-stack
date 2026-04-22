@@ -18,9 +18,10 @@ model_list:
       api_base: http://vllm-backend:8000/v1
       api_key: EMPTY  # vLLM nội bộ thường không set key
       timeout: 600    # Timeout dài cho reasoning/coding tasks
+      stream_timeout: 30 # Timeout nếu không có token nào trả về trong 30s
       #max_tokens: 4096
       rpm: 1000       # Requests per minute limit
-      upports_function_calling: true  # QUAN TRỌNG!
+      supports_function_calling: true  # QUAN TRỌNG!
       supports_parallel_function_calling: true  # Optional
 
   # Alias cho compatibility với các tool dùng tên OpenAI
