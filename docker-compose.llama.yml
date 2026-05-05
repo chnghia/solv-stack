@@ -1,0 +1,45 @@
+services:
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-server
+    restart: unless-stopped
+    environment:
+      - CUDA_VISIBLE_DEVICES=${LLAMA_CUDA_DEVICES:-0}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ./models:/models
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      -m /models/${LLAMA_MODEL:-model.gguf}
+      --host 0.0.0.0
+      --port 8080
+      --n-gpu-layers ${LLAMA_N_GPU_LAYERS:-999}
+      --ctx-size ${LLAMA_CTX_SIZE:-8192}
+      --parallel ${LLAMA_PARALLEL:-4}
+      --cont-batching
+      --jinja
+      --chat-template ${LLAMA_CHAT_TEMPLATE:-auto}
+      --api-key ${LLAMA_API_KEY:-EMPTY}
+    expose:
+      - "8080"
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  ai-net:
+    external: true
+    driver: bridge

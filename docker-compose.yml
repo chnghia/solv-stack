@@ -27,57 +27,6 @@ services:
       start_period: 10s
 
   # ==========================================
-  # AI COMPUTE LAYER (vLLM)
-  # ==========================================
-  vllm-backend:
-    build:
-      context: .
-      dockerfile: vllm.Dockerfile
-    container_name: vllm-engine
-    # runtime: nvidia
-    restart: unless-stopped
-    environment:
-      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    volumes:
-      - vllm_data:/root/.cache/
-      - ./models:/models
-        #- ~/.cache/huggingface:/root/.cache/huggingface
-        #- ./data/vllm_cache:/root/.cache/vllm           # Compiled kernels cache
-        #- ./data/torch_cache:/root/.cache/torch         # PyTorch cache
-    shm_size: '8gb'
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    command: >
-      --model /models/${VLLM_MODEL:-Qwen2.5-7B-Instruct}
-      --served-model-name "${VLLM_MODEL_NAME:-qwen2.5-7b}"
-      --tensor-parallel-size ${TENSOR_PARALLEL_SIZE:-1}
-      --max-model-len ${MAX_MODEL_LEN:-131072}
-      --gpu-memory-utilization ${GPU_MEMORY_UTILIZATION:-0.60}
-      --enable-chunked-prefill
-      --enable-auto-tool-choice
-      --tool-call-parser "${VLLM_TOOLCALL}"
-      --enable-prefix-caching
-      --dtype auto
-
-    expose:
-      - "8000"
-    networks:
-      - ai-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s  # vLLM cần thời gian load model
-
-  # ==========================================
   # API ROUTING LAYER
   # ==========================================
   litellm:
@@ -201,5 +150,3 @@ services:
   #     timeout: 10s
   #     retries: 3
   #     start_period: 20s
-volumes:
-    vllm_data: # Define the named volume at the top level
