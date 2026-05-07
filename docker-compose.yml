@@ -37,6 +37,7 @@ services:
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-solv-stack}
       - LITELLM_CANCEL_UPSTREAM_ON_DISCONNECT=True
       - LITELLM_LOG=INFO
+      - LITELLM_HTTP_TIMEOUT=600
     volumes:
       - ./litellm_config.yaml:/app/config.yaml
     command: [ "--config", "/app/config.yaml", "--port", "4000" ]
