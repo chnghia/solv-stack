@@ -6,7 +6,7 @@ services:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
     container_name: tei-embedding
     restart: unless-stopped
-    command: --model-id BAAI/bge-small-en-v1.5
+    command: --model-id BAAI/bge-m3 --auto-truncate
     ports:
       - "8081:80"
     networks:
