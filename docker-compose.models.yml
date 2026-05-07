@@ -3,7 +3,7 @@ services:
   # EMBEDDING LAYER (TEI)
   # ==========================================
   tei-embedding:
-    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
     container_name: tei-embedding
     restart: unless-stopped
     command: --model-id BAAI/bge-small-en-v1.5
